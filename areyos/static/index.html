@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Areyos Lead Generator</title>
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<header>
+  <div class="topbar">
+    <div><h1>Areyos <span>Sales</span></h1><p>Indoor wayfinding prospects across India</p></div>
+    <label class="acting">Acting as <select id="acting-rep"><option value="">No rep selected</option></select></label>
+  </div>
+  <nav class="tabs" id="tabs">
+    <button data-tab="leads" class="active">Leads</button>
+    <button data-tab="followups">Follow-ups <span id="due-badge" class="badge" hidden></span></button>
+    <button data-tab="discover">Discover</button>
+    <button data-tab="people">Decision-makers</button>
+    <button data-tab="analytics">Analytics</button>
+    <button data-tab="duplicates">Duplicates</button>
+    <button data-tab="team">Team</button>
+  </nav>
+</header>
+
+<main>
+  <section class="card" data-panel="discover" id="discover" hidden>
+    <h2>Discover prospects</h2>
+    <form id="run-form">
+      <div class="row">
+        <label>State
+          <select name="state" id="state" required></select>
+        </label>
+        <label>City
+          <input name="city" id="city" list="city-list" required placeholder="Pick or type any city">
+          <datalist id="city-list"></datalist>
+        </label>
+      </div>
+      <fieldset>
+        <legend>Industries <button type="button" class="link" data-toggle="industries">all / none</button></legend>
+        <div class="checks" id="industries"></div>
+      </fieldset>
+      <div class="row">
+        <fieldset>
+          <legend>Venue size</legend>
+          <div class="checks inline" id="venue_sizes"></div>
+        </fieldset>
+        <fieldset>
+          <legend>Priority level</legend>
+          <div class="checks inline" id="priority_levels"></div>
+        </fieldset>
+        <fieldset>
+          <legend>Sources</legend>
+          <div class="checks inline" id="providers"></div>
+        </fieldset>
+      </div>
+      <label class="toggle"><input type="checkbox" name="generate_reports" checked> Write an evidence-cited opportunity report for every venue <span class="muted">(AI for medium and high priority; rules-based for the rest)</span></label>
+      <label class="toggle"><input type="checkbox" name="assess_opportunity" checked> Score indoor-navigation opportunity (0–100) at medium and high priority venues <span class="muted">(AI reads public evidence; every score is explained)</span></label>
+      <label class="toggle"><input type="checkbox" name="find_people" id="find_people" checked> Identify decision-makers at medium and high priority venues <span class="muted" id="people-sources"></span></label>
+      <p class="hint">Every venue found is stored; venue size and priority narrow the results you see.</p>
+      <button type="submit" class="primary">Start discovery</button>
+      <span id="form-msg" role="status"></span>
+    </form>
+  </section>
+
+  <section class="card" data-panel="discover" hidden>
+    <h2>Recent runs</h2>
+    <div class="table-wrap"><table class="runs"><thead><tr><th>#</th><th>Location</th><th>Industries</th><th>Status</th><th>Found</th><th>New</th><th>Jobs</th><th></th></tr></thead>
+      <tbody id="runs"></tbody></table></div>
+  </section>
+
+  <section class="card" data-panel="people" hidden>
+    <h2>Decision-makers <small id="people-total"></small></h2>
+    <form id="people-filters" class="row filters">
+      <input name="q" placeholder="Search name, title or venue">
+      <select name="role" id="p-role"><option value="">Any role</option></select>
+      <select name="industry" id="p-industry"><option value="">Any industry</option></select>
+      <input name="city" placeholder="City">
+      <select name="has_contact"><option value="">Any contact</option><option value="true">Has email/phone</option></select>
+      <select name="min_confidence"><option value="">Any confidence</option><option value="0.8">80%+ match</option><option value="0.9">90%+ match</option></select>
+      <input type="hidden" name="run_id">
+      <a id="people-export" class="button" href="/api/people.csv">Export CSV</a>
+    </form>
+    <div class="table-wrap">
+      <table><thead><tr><th>Name</th><th>Role</th><th>Venue</th><th>LinkedIn</th><th>Contact</th><th>Match</th><th>Source</th></tr></thead>
+        <tbody id="people"></tbody></table>
+    </div>
+    <div class="pager"><button id="p-prev">Previous</button><span id="p-page"></span><button id="p-next">Next</button></div>
+  </section>
+
+  <section class="card" data-panel="leads">
+    <h2>Leads <small id="total"></small></h2>
+    <form id="filters" class="row filters">
+      <input name="q" placeholder="Search name or address">
+      <select name="state" id="f-state"><option value="">Any state</option></select>
+      <input name="city" placeholder="City">
+      <select name="industry" id="f-industry"><option value="">Any industry</option></select>
+      <select name="size" id="f-size"><option value="">Any size</option></select>
+      <select name="opportunity" id="f-opportunity"><option value="">Any opportunity</option><option value="high">High opportunity</option><option value="medium">Medium opportunity</option><option value="low">Low opportunity</option></select>
+      <select name="priority" id="f-priority"><option value="">Any lead score</option></select>
+      <select name="status" id="f-status"><option value="">Any status</option></select>
+      <select name="owner" id="f-owner"><option value="">Any owner</option><option value="me">My leads</option><option value="none">Unassigned</option></select>
+      <select name="sort"><option value="opportunity">Top opportunity</option><option value="deal">Largest deal</option><option value="activity">Recent activity</option><option value="score">Top lead score</option><option value="reviews">Most reviews</option><option value="recent">Newest</option><option value="name">Name</option></select>
+      <input type="hidden" name="run_id">
+      <button type="button" id="clear-run" hidden>Clear run filter</button>
+      <a id="export" class="button" href="/api/prospects.csv">Export CSV</a>
+      <a id="export-reports" class="button" href="/api/reports.md">Export reports</a>
+    </form>
+    <div class="row bulk">
+      <span class="muted" id="selected-count">0 selected</span>
+      <select id="bulk-rep"><option value="">Assign selected to…</option></select>
+      <button type="button" id="bulk-assign">Assign</button>
+      <button type="button" id="auto-assign" title="Give unassigned open leads to reps by industry and workload">Auto-assign unassigned</button>
+      <button type="button" id="add-lead" class="primary">Add lead</button>
+      <span id="bulk-msg" class="muted" role="status"></span>
+    </div>
+    <div class="table-wrap">
+      <table class="prospects"><thead><tr><th><input type="checkbox" id="select-all" aria-label="Select all"></th><th>Opportunity</th><th>Name</th><th>Industry</th><th>City</th><th>Stage</th><th>Owner</th><th>Deal (₹)</th><th>Next follow-up</th></tr></thead>
+        <tbody id="prospects"></tbody></table>
+    </div>
+    <div class="pager"><button id="prev">Previous</button><span id="page"></span><button id="next">Next</button></div>
+  </section>
+  <section class="card" data-panel="followups" hidden>
+    <h2>Follow-ups</h2>
+    <form id="fu-filters" class="row filters">
+      <select name="scope"><option value="me">Mine</option><option value="all">Everyone's</option></select>
+      <select name="when"><option value="open">All open</option><option value="overdue">Overdue only</option><option value="done">Done</option></select>
+      <a id="fu-export" class="button" href="/api/follow-ups.csv">Export CSV</a>
+    </form>
+    <div class="table-wrap"><table><thead><tr><th>Due</th><th>Type</th><th>Lead</th><th>Stage</th><th>Owner</th><th>Note</th><th></th></tr></thead>
+      <tbody id="followups"></tbody></table></div>
+  </section>
+
+  <section class="card" data-panel="analytics" hidden>
+    <h2>Pipeline funnel</h2>
+    <p class="muted">Leads at each stage. Hover a bar for deal value and stage probability.</p>
+    <div id="funnel" class="hbars"></div>
+  </section>
+  <section class="card" data-panel="analytics" hidden>
+    <h2>By industry</h2>
+    <div class="table-wrap"><table class="num"><thead><tr><th>Industry</th><th>Leads</th><th>Engaged</th><th>Converted</th><th>Win rate</th><th>Open pipeline (₹)</th><th>Weighted (₹)</th><th>Won (₹)</th><th>Avg opportunity</th></tr></thead>
+      <tbody id="industry-analytics"></tbody></table></div>
+  </section>
+  <section class="card" data-panel="analytics" hidden>
+    <h2>Sales reps <small class="muted">activity in the last <select id="sc-days"><option>7</option><option selected>30</option><option>90</option></select> days</small></h2>
+    <div class="table-wrap"><table class="num"><thead><tr><th>Rep</th><th>Open leads</th><th>Converted</th><th>Calls</th><th>Meetings</th><th>Emails</th><th>Reply rate</th><th>Overdue follow-ups</th><th>Weighted pipeline (₹)</th><th>Won (₹)</th></tr></thead>
+      <tbody id="scorecards"></tbody></table></div>
+    <p><a class="button" href="/api/activities.csv">Export all activity (CSV)</a></p>
+  </section>
+
+  <section class="card" data-panel="duplicates" hidden>
+    <h2>Possible duplicate leads</h2>
+    <p class="muted">Pairs with the same website or phone, the same name in the same city, or a similar name within ~250 m. Merging keeps the first lead and moves everything from the second into it.</p>
+    <div class="table-wrap"><table><thead><tr><th>Keep</th><th>Duplicate</th><th>Why</th><th></th></tr></thead><tbody id="duplicates"></tbody></table></div>
+  </section>
+
+  <section class="card" data-panel="team" hidden>
+    <h2>Sales team</h2>
+    <form id="rep-form" class="row filters">
+      <input name="name" placeholder="Name" required>
+      <input name="email" type="email" placeholder="Email" required>
+      <input name="phone" placeholder="Phone">
+      <select name="industries" id="rep-industries" multiple size="3" title="Industries this rep covers (none = all)"></select>
+      <button class="primary">Add rep</button>
+      <span id="rep-msg" class="muted" role="status"></span>
+    </form>
+    <div class="table-wrap"><table><thead><tr><th>Name</th><th>Email</th><th>Industries</th><th>Status</th></tr></thead><tbody id="reps"></tbody></table></div>
+  </section>
+</main>
+
+<dialog id="lead-dialog">
+  <form id="lead-form">
+    <h2>Add lead</h2>
+    <div class="row">
+      <label>Venue name <input name="name" required></label>
+      <label>Industry <select name="industry" id="lead-industry" required></select></label>
+    </div>
+    <div class="row">
+      <label>City <input name="city" required></label>
+      <label>State <select name="state" id="lead-state" required></select></label>
+    </div>
+    <div class="row">
+      <label>Website <input name="website"></label>
+      <label>Phone <input name="phone"></label>
+      <label>Deal value (₹) <input name="deal_value" type="number" min="0" step="1000"></label>
+    </div>
+    <label>Notes <textarea name="notes" rows="2"></textarea></label>
+    <div id="dup-warning"></div>
+    <p><button class="primary" id="lead-save">Save lead</button> <button type="button" id="lead-cancel">Cancel</button></p>
+  </form>
+</dialog>
+
+<dialog id="detail"><div id="detail-body"></div><form method="dialog"><button>Close</button></form></dialog>
+
+<footer>Venue data from Google Places and &copy; OpenStreetMap contributors (ODbL). Contacts and decision-makers come only from public sources (venue websites, search-engine results for public LinkedIn profiles, and Hunter.io where configured), each with its source link; nothing is inferred or guessed. Verify before outreach and honour opt-outs with "Do not contact".</footer>
+<script src="/static/app.js"></script>
+<script src="/static/crm.js"></script>
+</body>
+</html>

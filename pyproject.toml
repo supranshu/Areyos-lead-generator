@@ -1,0 +1,36 @@
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "areyos-lead-generator"
+version = "1.0.0"
+description = "Multi-industry B2B prospect discovery for Areyos indoor wayfinding"
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.30",
+    "sqlalchemy>=2.0",
+    "psycopg[binary]>=3.1",
+    "alembic>=1.13",
+    "httpx>=0.27",
+    "pydantic-settings>=2.3",
+    "typer>=0.12",
+    "anthropic>=2.3",
+    "email-validator>=2.1",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8", "respx>=0.21"]
+
+[project.scripts]
+areyos = "areyos.cli:app"
+
+[tool.setuptools.packages.find]
+include = ["areyos*"]
+
+[tool.setuptools.package-data]
+areyos = ["static/*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
