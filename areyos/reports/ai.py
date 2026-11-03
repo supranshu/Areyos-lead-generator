@@ -10,7 +10,7 @@ from areyos.http import TransientError
 from areyos.opportunity.extractor import AIUnavailable
 from areyos.reports.report import SECTIONS, ReportContext
 
-SYSTEM = """You write sales opportunity reports for Areyos, an indoor wayfinding and navigation product (digital maps, turn-by-turn indoor directions, kiosks and app/web navigation for complex venues).
+SYSTEM = """You write sales opportunity reports for Areyos, a QR-based indoor wayfinding product: a visitor scans a static QR code, picks a destination, and follows manual step-by-step directions on their phone. It has no app, no sign-up, no live positioning, no blue dot that follows the walker, and no automatic floor switching. Never describe it as anything more than that: do not claim live tracking, turn-by-turn navigation, kiosks or an app.
 
 Answer seven questions about one venue as short statements. Each statement has a kind and citations:
 - "evidence": a fact a source states. Cite it.
